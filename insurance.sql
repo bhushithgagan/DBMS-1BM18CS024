@@ -82,3 +82,4 @@ insert into accident values ("15",22-03-2000,"CR road");
 select count(distinct driverid) from participated,accident where participated.reportno = accident.reportno and accidentdate like '%00';
 select count(participated.reportno) as count from participated,car where participated.regno = car.regno and car.model = 'mazda'; 
 
+select driverid from participated where damageamount > (select avg(damageamount) from participated);
