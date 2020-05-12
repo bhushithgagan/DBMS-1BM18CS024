@@ -1,46 +1,102 @@
-create database supply;
-use supply;
-create table supplier (
+create database lab3;
+use lab3;
+
+create table supplier(
 sid int,
-sname varchar(20),
-city varchar(20),
-primary key(sid));
+sname varchar(30),
+city varchar(30),
+primary key(sid)
+);
 
-create table parts (
+create table parts(
 pid int,
-pname varchar(20),
-color varchar(20),
-primary key(pid));
+pname varchar(30),
+color varchar(10),
+primary key(pid)
+);
 
-create table catalog (
+create table catalog(
 sid int,
 pid int,
-cost int,
-foreign key (sid) references supplier(sid),
-foreign key (pid) references parts(pid));
+cost float,
+foreign key(sid) references supplier(sid),
+foreign key(pid) references parts(pid)
+);
 
-insert into supplier values(101,"ABC","BLORE");
-insert into supplier values(102,"XYZ","BLORE");
-insert into supplier values(103,"PQR","BLORE");
-insert into supplier values(104,"RST","CHENNAi");
-insert into supplier values(105,"BCD","BLORE");
-insert into supplier values(101,"ABC","BLORE");
+insert into supplier values (10001, "Acme Widget", "Bangalore"), (10002, "Johns", "Kolkata"), (10003, "Vimal", "Mumbai"), (10004, "Reliance", "Delhi");
 
-insert into parts values(201,"PEN","BLUE");
-insert into parts values(202,"BOOK","RED");
-insert into parts values(203,"PEN","YELLOW");
-insert into parts values(204,"PENCIL","GREEN");
-insert into parts values(205,"ERASER","BLUE");
+insert into parts values (20001, "Book", "Red"),
+						(20002, "Pen", "Red"),
+                        (20003, "Pencil", "Green"),
+                        (20004, "Mobile", "Green"),
+                        (20005, "Charger", "Black");
 
-insert into catalog values(101,201,50);
-insert into catalog values(101,202,50);
-insert into catalog values(102,201,30);
-insert into catalog values(102,202,30);
-insert into catalog values(103,203,10);
- 
+insert into catalog values (10001, 20001, 10),
+						(10001, 20002, 10),
+                        (10001, 20003, 30),
+                        (10001, 20004, 10),
+                        (10001, 20005, 10),
+                        (10002, 20001, 10),
+                        (10002, 20002, 20),
+                        (10003, 20003, 30),
+                        (10004, 20003, 40);
+                        
+select distinct sid
+from catalog, parts
+where parts.color = 'Red'
+or parts.color = 'Green'
+and parts.pid = catalog.pid;
 
-select distinct catalog.sid from parts,catalog where catalog.pid = parts.pid and parts.color="red" or parts.color="green";
+select distinct supplier.sid
+from supplier, parts, catalog
+where catalog.sid = supplier.sid
+and catalog.pid = parts.pid
+and parts.color = 'Red'
+or supplier.city = 'Bangalore';
 
-select distinct sid from supplier,parts where parts.color="red" or supplier.city="BLORE";
+select distinct c1.sid first, c2.sid second
+from catalog c1, catalog c2
+where c1.cost > c2.cost
+and c1.sid != c2.sid
+and c1.pid = c2.pid;
 
-select c1.sid,c2.sid from catalog c1,catalog c2 where c1.pid = c2.pid and c1.sid <> c2.sid and c1.cost>c2.cost;
+select distinct pname 
+from Parts, Catalog
+where Parts.pid=Catalog.pid;
+
+select S.sname from Supplier S
+where not exists(select P.pid from Parts P where P.pid
+					not in
+                    (select distinct C.pid from Catalog C
+                    where C.sid=S.sid));
+
+select sname 
+from Supplier
+where not exists( select pid from Parts where color='Red'
+					not in
+                    (select distinct Catalog.pid 
+                    from Catalog , Parts
+                    where Parts.pid=Catalog.pid and Parts.color='Red' and  Catalog.sid=Supplier.sid));
+                    
+
+select pname
+from Parts,Catalog,Supplier
+where Catalog.pid=Parts.pid and Catalog.sid=Supplier.sid 
+and Supplier.sname='Acme Widget' and Catalog.pid not in (select c.pid from Catalog c ,Supplier s
+							where s.sid=c.sid and s.sname<>'Acme Widget');
+
+
+select sid
+from Catalog c
+where c.cost>( select avg(c1.cost)
+		from Catalog c1
+		where c.pid=c1.pid);
+                
+                
+select p.pid, s.sname
+from Parts p, Supplier s, Catalog c
+where p.pid=c.pid and s.sid=c.sid
+and c.cost=(select max(c1.cost)
+	    from Catalog c1
+            where c1.pid=c.pid);
+            
