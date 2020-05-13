@@ -1,7 +1,6 @@
 create database lab2;
 use lab2;
 
-
 create table branch(
 branch_name varchar(30),
 branch_city varchar(30),
@@ -35,6 +34,13 @@ amount real,
 primary key(loan_num),
 foreign key(branch_name)references Branch(branch_name));
 
+create table borrower(
+cust_name varchar(20),
+loan_num int,
+foreign key(cust_name) references bankcust(cust_name),
+foreign key(loan_num) references loan(loan_num));
+
+
 insert into branch values ('SBI_Chamrajpet','Bangalore',50000),('SBI_ResidencyRoad','Bangalore',10000),
 ('SBI_ShivajiRoad','Bombay',20000),('SBI_ParlimentRoad','Delhi',10000),('SBI_Jantarmantar','Delhi',20000);
 
@@ -52,6 +58,8 @@ insert into Depositor values('Avinash',1),('Dinesh',2),('Nikil',4),('Ravi',5),('
 insert into loan values(1,'SBI_Chamrajpet',1000),(2,'SBI_ResidencyRoad',2000),(3,'SBI_ShivajiRoad',3000),
 (4,'SBI_ParlimentRoad',4000),(5,'SBI_Jantarmantar',5000);
 
+insert into borrower values('Avinash',1), ('Dinesh',2), ('Nikil',3), ('Avinash', 4), ('Dinesh', 5);
+
 select C.cust_name 
 from BankCust C
 where exists (
@@ -65,7 +73,7 @@ where exists (
                 
 select BC.cust_name from BankCust BC
 where not exists(
-					select branch_name from branch where branch_city = 'Delhi'
+					select branch_name from branch where branch_city = 'Delhi' and branch_name
                     not in
                     (select BA.branch_name from depositor D , accounts BA
                     where D.accno = BA.accno AND BC.cust_name = D.cust_name)
